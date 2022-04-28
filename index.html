@@ -1,0 +1,96 @@
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Earring</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100%; margin:auto }
+    </style>
+</head>
+<body>
+
+<script src="js/three.js"></script>
+<script src="js/objLoader.js"></script>
+<script>
+    var timestamp0 = -1;
+    var mouseX = 0, mouseY = 0;
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+    camera.position.z = 120;
+
+    // add lights
+    const ambientLight = new THREE.AmbientLight( 0xeeffee, 0.4 );
+    scene.add( ambientLight );
+
+    const pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+    camera.add( pointLight );
+    scene.add( camera );
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth * 3 / 4, window.innerHeight * 3 / 4 );
+    document.body.appendChild( renderer.domElement );
+
+    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    // var cube = new THREE.Mesh( geometry, material );
+    // scene.add( cube );
+
+
+
+    var object;
+    function loadModel() {
+        // object.traverse( function ( child ) {
+        //     if ( child.isMesh ) child.material.map = texture;
+        // } );
+
+        // object.position.y = - 95;
+        scene.add( object );
+
+    }
+
+    const manager = new THREE.LoadingManager( loadModel );
+
+    // texture
+    const textureLoader = new THREE.TextureLoader( manager );
+    const texture = textureLoader.load( 'assets/img/uv_grid_opengl.jpeg' );
+
+    // load obj
+    const loader = new OBJLoader( manager );
+    loader.load( 'assets/model/ringSilver.obj', function ( obj ) {
+        object = obj;
+    });
+
+    window.addEventListener('resize', function() {
+
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( window.innerWidth * 3 / 4, window.innerHeight * 3 / 4 );
+
+    });
+
+    document.addEventListener( 'mousemove', function( event ) {
+        mouseX = ( event.clientX - window.innerWidth * 3 / 4 ) / 2;
+        mouseY = ( event.clientY - window.innerHeight * 3 / 4 ) / 2;
+    } );
+
+    function render(timestamp) {
+        if (timestamp0 == -1) {
+            timestamp0 = timestamp;
+        }
+        // let timeElapsed = (timestamp - timestamp0) / 1000; // in second
+        // camera.position.y = 1.0 * Math.sin(timeElapsed);
+
+        camera.position.x += ( mouseX - camera.position.x ) * .05;
+        camera.position.y += ( - mouseY - camera.position.y ) * .05;
+
+        camera.lookAt( scene.position );
+
+        requestAnimationFrame( render );
+        renderer.render( scene, camera );
+    }
+    requestAnimationFrame( render );
+</script>
+</body>
